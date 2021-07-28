@@ -39,6 +39,13 @@ int height(node*root){
     return max(lh,rh)+1;
 }
 
+int minHeight(node* root,int l){
+    if(root==NULL) return l;
+    l++;
+    return min(minHeight(root->lc,l),minHeight(root->rc,l));
+
+}
+
 void levelK(node*root,int currLevel,int k){
     if(root==NULL) return;
     if(currLevel==k){
@@ -360,23 +367,142 @@ int sumLongestPath(node* root,int lvl,int h,int sum){
     int left=sumLongestPath(root->lc,lvl+1,h,sum + root->d);
     int right=sumLongestPath(root->rc,lvl+1,h,sum + root->d);
 }
+void boundaryLeft(node* root){
+    if(root==NULL) return;
+    if(root->lc){
+        cout<<root->d<<" ";
+        boundaryLeft(root->lc);
+    }
+    else if(root->rc){
+        cout<<root->d<<" ";
+        boundaryLeft(root->rc);
+    }
+    return;
+}
+void boundaryRight(node* root){
+    if(root==NULL) return;
+    if(root->rc){
+        
+        boundaryRight(root->rc);
+        cout<<root->d<<" ";
+    }
+    else if(root->lc){
+        
+        boundaryRight(root->lc);
+        cout<<root->d<<" ";
+    }
+    return;
+}
+void leaf(node* root){
+    if(root==NULL) return;
+    leaf(root->lc);
+    if(root->lc==NULL && root->rc==NULL) cout<<root->d<<" ";
+    leaf(root->rc);
+    return;
+}
+void diagonalTravHelper(node* root,int lvl,map<int,vector<int> > &m){
+    if(root==NULL) return;
+
+    m[lvl].push_back(root->d);
+
+    diagonalTravHelper(root->lc,lvl+1,m);
+    diagonalTravHelper(root->rc,lvl,m);  
+}
+void diagonalTrav(node* root){
+    map<int,vector<int> > m;
+    diagonalTravHelper(root,0,m);
+    for( int i=0;i<m.size();i++){
+        for(int j=0;j<m[i].size();j++){
+            cout<<m[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+
+}
+void boundaryTrav(node* root){
+    if(root==NULL) return;
+
+    cout<<root->d<<" ";
+    boundaryLeft(root->lc);
+    leaf(root->lc);
+    leaf(root->rc);
+    boundaryRight(root->rc);
+}
+bool ansbool=true;
+void leafNodesSameLevel(node* root,int currlvl,int &prevlvl){
+    if(root==NULL) return;
+    if(root->lc ==NULL && root->rc==NULL){
+        if(prevlvl==-1){
+            prevlvl=currlvl;
+            ansbool=true;
+        }
+        else if(currlvl!=prevlvl){
+            ansbool= false;
+        }
+    }
+    leafNodesSameLevel(root->lc,currlvl+1,prevlvl);
+    leafNodesSameLevel(root->rc,currlvl+1,prevlvl);
+}
+
+
+void zigzag(node* root){
+    if(root==NULL) return;
+    stack<node*> curr,next;
+    curr.push(root);
+
+    bool flag=true;
+
+    while(!curr.empty()){
+        node* t=curr.top();
+        curr.pop();
+
+        if(t){
+            cout<<t->d<<" ";
+
+            if(flag){
+                if(t->lc) next.push(t->lc);
+                if(t->rc) next.push(t->rc);
+            }
+            else{
+                if(t->rc) next.push(t->rc);
+                if(t->lc) next.push(t->lc);
+            }
+        }
+        if(curr.empty()){
+            swap(curr,next);
+            flag = ! flag;
+        }
+    }
+
+}
+
+void pathtoNode(node* root,int target,vector<int> v){
+    if(root==NULL){
+        return;
+    }
+    v.push_back(root->d);
+    if(root->d == target){\
+    
+        return;
+    }
+    pathtoNode(root->lc,target,v);
+    pathtoNode(root->rc,target,v);
+
+    v.pop_back();
+    return;
+
+}
+
 int main(){
     node* root =buildTree();
-    // bfs(root);
-    // cout<<endl;
-    // bfs(mirror(root));
-    // maxSumPath(root);
-    // cout<<ans;
-    // int n1,n2;
-    // cin>>n1>>n2;
-    // node* c=LCA(root,n1,n2);
-    // cout<<levelkey(c,n1,0) + levelkey(c,n2,0);
-    // vector<int> v;
-    // kSumPath(root,8,v);
-    // int ans=INT_MIN;
-    // maxSubarrSum(root,ans);
-    int h=height(root);
-    sumLongestPath(root,0,h,0);
-    cout<<ansSum;
+    // boundaryTrav(root);
+    // int prev/
+    // cout<<minHeight(root,0);
+    // diagonalTrav(root);
+    vector<int> v;
+    pathtoNode(root,6,v);
+    for(int i=0;i<v.size();i++)
+        cout<<v[i]<<" ";
+   
 }
 
